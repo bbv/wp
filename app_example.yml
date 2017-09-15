@@ -1,9 +1,0 @@
-db:
-    host: "localhost"
-    port: 3306
-    login: "root"
-    password: ""
-    database: "poller"
-
-port: 8080
-
