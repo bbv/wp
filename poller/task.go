@@ -13,24 +13,17 @@ type Poller struct {
 }
 
 type Task struct {
-	Url   string `yaml:url`
-	Delay int    `yaml:delay`
-	Id    int
-}
-
-type Response struct {
-	TaskId     int
-	StatusCode int
-	Time       time.Time
+	Url   string `yaml:"url" json:"url"`
+	Delay int    `yaml:"delay" json:"-"`
+	Id    int    `json:"id"`
 }
 
 func (t Task) Poll() {
 	for {
 		resp, _ := http.Get(t.Url)
 		log.Println(t.Url, ": ", resp.StatusCode)
-		//time.Sleep(time.Duration(t.Delay) * time.Second)
-		t.SaveResponse(resp.StatusCode)
-		time.Sleep(2 * time.Second)
+		SaveLogEntry(t, resp.StatusCode)
+		time.Sleep(time.Duration(t.Delay) * time.Second)
 	}
 }
 
@@ -57,7 +50,7 @@ func (t *Task) Load() error {
 }
 
 func (t *Task) Save() error {
-	res, err := db.DB.Exec("INSERT INtO tasks SET url=?", t.Url)
+	res, err := db.DB.Exec("INSERT INTO tasks SET url=?", t.Url)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,11 +62,20 @@ func (t *Task) Save() error {
 	return nil
 }
 
-func (t Task) SaveResponse(statusCode int) error {
-	_, err := db.DB.Exec("REPLACE INTO logs SET task_id=?, time=NOW(), status_code=?", t.Id, statusCode)
+func LoadTasks() []Task {
+	tasks := make([]Task, 0)
+	rows, err := db.DB.Query("SELECT id, url FROM tasks")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return nil
+	defer rows.Close()
+	for rows.Next() {
+		var t Task
+		err := rows.Scan(&t.Id, &t.Url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tasks = append(tasks, t)
+	}
+	return tasks
 }

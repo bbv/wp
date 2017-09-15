@@ -16,7 +16,7 @@ var DB *sql.DB
 
 func Init(dbconfig DBConfig) error {
 	var err error
-	DB, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", dbconfig.Login, dbconfig.Password, dbconfig.Host, dbconfig.Port, dbconfig.Database))
+	DB, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", dbconfig.Login, dbconfig.Password, dbconfig.Host, dbconfig.Port, dbconfig.Database))
 	if err != nil {
 		return err
 	}

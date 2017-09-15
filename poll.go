@@ -13,14 +13,9 @@ type Config struct {
 	Tasks []poller.Task `yaml:"urls",inline`
 }
 
-type AppConfig struct {
-	Port int
-	Db   db.DBConfig
-}
-
 func main() {
 	fmt.Println("vim-go")
-	appConfig, err := readAppConfig("app.yml")
+	appConfig, err := poller.ReadAppConfig("app.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,19 +42,6 @@ func readConfig(filename string) (Config, error) {
 		return Config{}, err
 	}
 	config := Config{}
-	err = yaml.UnmarshalStrict(cf, &config)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return config, nil
-}
-
-func readAppConfig(filename string) (AppConfig, error) {
-	cf, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return AppConfig{}, err
-	}
-	config := AppConfig{}
 	err = yaml.UnmarshalStrict(cf, &config)
 	if err != nil {
 		log.Fatal(err)
